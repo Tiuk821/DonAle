@@ -8,33 +8,29 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <script>
-      // Komponen untuk menangani galeri
       AFRAME.registerComponent('gallery-controller', {
         init: function () {
-          // 1. DAFTAR GAMBAR (Ganti nama file sesuai aset kamu)
-          // Pastikan semua gambar ini sudah ada di folder atau di <a-assets>
+          // Daftar ID gambar harus sama dengan yang ada di <a-assets>
           this.images = [
-            "#donatSatu", // Index 0
-            "#donatDua",  // Index 1 (Contoh: tambahkan gambar ini di assets)
-            "#donatTiga",  // Index 2 (Contoh: tambahkan gambar ini di assets)
-            "#donatEmpat",  // Index 2 (Contoh: tambahkan gambar ini di assets)
-            "#donatLima",  // Index 2 (Contoh: tambahkan gambar ini di assets)
-            "#donatEnam"  // Index 2 (Contoh: tambahkan gambar ini di assets)
+            "#donatSatu", 
+            "#donatDua", 
+            "#donatTiga",
+            "#donatEmpat",
+            "#donatLima",
+            "#donatEnam"
           ];
           
-          this.currentIndex = 0; // Mulai dari gambar pertama
+          this.currentIndex = 0;
           
-          // Ambil elemen Plane tempat gambar tampil
+          // Mengambil elemen dari Scene
           this.displayPlane = document.querySelector('#display-plane');
-          
-          // Ambil tombol panah
           this.arrowLeft = document.querySelector('#arrow-left');
           this.arrowRight = document.querySelector('#arrow-right');
 
           // --- LOGIKA KLIK KANAN (NEXT) ---
           this.arrowRight.addEventListener('click', () => {
             this.currentIndex++;
-            // Jika sudah di gambar terakhir, balik ke awal (Looping)
+            // Jika sudah di akhir, kembali ke awal
             if (this.currentIndex >= this.images.length) {
               this.currentIndex = 0;
             }
@@ -44,7 +40,7 @@
           // --- LOGIKA KLIK KIRI (PREV) ---
           this.arrowLeft.addEventListener('click', () => {
             this.currentIndex--;
-            // Jika di gambar pertama dan klik kiri, pindah ke terakhir
+            // Jika di awal, lompat ke akhir
             if (this.currentIndex < 0) {
               this.currentIndex = this.images.length - 1;
             }
@@ -52,24 +48,27 @@
           });
         },
 
+        // Fungsi untuk mengganti gambar pada Plane
         updateImage: function() {
-          // Ubah atribut src pada plane sesuai index saat ini
           this.displayPlane.setAttribute('src', this.images[this.currentIndex]);
-          console.log("Menampilkan gambar index: " + this.currentIndex);
         }
       });
     </script>
 </head>
 <body>
-    <a-scene mindar-image="imageTargetSrc: /TyCardCompiled2.mind; filterMinCF:0.0001; filterBeta: 0.001;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
+             color-space="sRGB" 
+             renderer="colorManagement: true, physicallyCorrectLights" 
+             vr-mode-ui="enabled: false" 
+             device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <img id="donatSatu" src="Gambar Donat/4.png">
-        <img id="donatDua" src="Gambar Donat/5.png">
-        <img id="donatTiga" src="Gambar Donat/6.png">
-        <img id="donatEmpat" src="Gambar Donat/7.png">
-        <img id="donatLima" src="Gambar Donat/8.png">
-        <img id="donatEnam" src="Gambar Donat/9.png">
+        <img id="donatSatu" src="assets/4.png">
+        <img id="donatDua" src="assets/5.png">
+        <img id="donatTiga" src="assets/6.png">
+        <img id="donatEmpat" src="assets/7.png">
+        <img id="donatLima" src="assets/8.png">
+        <img id="donatEnam" src="assets/9.png">
         <a-asset-item id="arrow" src="direction_arrow.glb"></a-asset-item>
       </a-assets>
 
