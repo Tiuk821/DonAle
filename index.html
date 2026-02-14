@@ -8,78 +8,125 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <script>
+      // --- KOMPONEN 1: MENGATUR UI (HILANGKAN HOLO) ---
+      AFRAME.registerComponent('ui-mode', {
+        init: function () {
+          const overlay = document.querySelector('.gambar');
+          
+          // KETIKA TARGET DITEMUKAN
+          this.el.addEventListener('targetFound', event => {
+            console.log("Target Ditemukan!");
+            // Hilangkan overlay
+            overlay.classList.add('hidden');
+          });
+
+          // KETIKA TARGET HILANG (Opsional: Munculkan lagi panduannya)
+          this.el.addEventListener('targetLost', event => {
+            console.log("Target Hilang!");
+            // Munculkan overlay lagi
+            overlay.classList.remove('hidden');
+          });
+        }
+      });
+
+      // --- KOMPONEN 2: MENGATUR GALERI (KODE LAMA) ---
       AFRAME.registerComponent('gallery-controller', {
         init: function () {
-          // Daftar ID gambar harus sama dengan yang ada di <a-assets>
           this.images = [
-            "#donatSatu", 
-            "#donatDua", 
-            "#donatTiga",
-            "#donatEmpat",
-            "#donatLima",
-            "#donatEnam"
+            "#donatSatu", "#donatDua", "#donatTiga",
+            "#donatEmpat", "#donatLima", "#donatEnam"
           ];
-          
           this.currentIndex = 0;
-          
-          // Mengambil elemen dari Scene
           this.displayPlane = document.querySelector('#display-plane');
           this.arrowLeft = document.querySelector('#arrow-left');
           this.arrowRight = document.querySelector('#arrow-right');
 
-          // --- LOGIKA KLIK KANAN (NEXT) ---
           this.arrowRight.addEventListener('click', () => {
             this.currentIndex++;
-            // Jika sudah di akhir, kembali ke awal
-            if (this.currentIndex >= this.images.length) {
-              this.currentIndex = 0;
-            }
+            if (this.currentIndex >= this.images.length) this.currentIndex = 0;
             this.updateImage();
           });
 
-          // --- LOGIKA KLIK KIRI (PREV) ---
           this.arrowLeft.addEventListener('click', () => {
             this.currentIndex--;
-            // Jika di awal, lompat ke akhir
-            if (this.currentIndex < 0) {
-              this.currentIndex = this.images.length - 1;
-            }
+            if (this.currentIndex < 0) this.currentIndex = this.images.length - 1;
             this.updateImage();
           });
         },
-
-        // Fungsi untuk mengganti gambar pada Plane
         updateImage: function() {
           this.displayPlane.setAttribute('src', this.images[this.currentIndex]);
         }
       });
     </script>
+
+    <style>
+        .gambar {
+            /* Posisi Overlay Full Screen */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            
+            /* Flexbox biar ke tengah */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* Agar klik tembus ke belakang (ke tombol AR) */
+            pointer-events: none; 
+
+            /* Transisi Halus (Fade Effect) */
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Class tambahan untuk menyembunyikan */
+        .gambar.hidden {
+            opacity: 0;
+        }
+
+        .holo {
+            width: 70%; /* Ukuran responsif */
+            max-width: 300px;
+            height: auto;
+            opacity: 0.8;
+            border-radius: 10px; /* Sedikit lengkung biar manis */
+            background: rgba(255, 255, 255, 0.2); /* Latar belakang tipis */
+            padding: 10px;
+            backdrop-filter: blur(5px); /* Efek blur kaca (opsional) */
+        }
+    </style>
 </head>
 <body>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
+    
+    <div class="gambar">
+        <img class="holo" src="TY Card (1).jpg" alt="Panduan Scan">
+    </div>
+
+    <a-scene mindar-image="imageTargetSrc: TyCardCompiled2.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
              color-space="sRGB" 
              renderer="colorManagement: true, physicallyCorrectLights" 
              vr-mode-ui="enabled: false" 
              device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <img id="donatSatu" src="assets/4.png">
-        <img id="donatDua" src="assets/5.png">
-        <img id="donatTiga" src="assets/6.png">
-        <img id="donatEmpat" src="assets/7.png">
-        <img id="donatLima" src="assets/8.png">
-        <img id="donatEnam" src="assets/9.png">
+        <img id="donatSatu" src="GambarDonat/4.png">
+        <img id="donatDua" src="GambarDonat/5.png">
+        <img id="donatTiga" src="GambarDonat/6.png">
+        <img id="donatEmpat" src="GambarDonat/7.png">
+        <img id="donatEnam" src="GambarDonat/6.png">
+        <img id="donatLima" src="GambarDonat/8.png">
         <a-asset-item id="arrow" src="direction_arrow.glb"></a-asset-item>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable"></a-camera>
 
-      <a-entity id="target-entity" mindar-image-target="targetIndex: 0" gallery-controller>
+      <a-entity id="target-entity" mindar-image-target="targetIndex: 0" gallery-controller ui-mode>
         
         <a-plane id="display-plane" src="#donatSatu" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
-        
         <a-gltf-model id="arrow-right" class="clickable" rotation="90 10 15" position="0.6 0 0" scale="0.05 0.05 0.05" src="#arrow"></a-gltf-model>
-        
         <a-gltf-model id="arrow-left" class="clickable" rotation="90 180 15" position="-0.6 0 0" scale="0.05 0.05 0.05" src="#arrow"></a-gltf-model>
       
       </a-entity>
