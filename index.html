@@ -1,208 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Food Gallery</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    
-    <script>
-      // --- KOMPONEN 1: UI MODE (Overlay) ---
-      AFRAME.registerComponent('ui-mode', {
-        init: function () {
-          const overlay = document.querySelector('.gambar');
-          this.el.addEventListener('targetFound', event => {
-            overlay.classList.add('hidden');
-          });
-          this.el.addEventListener('targetLost', event => {
-            overlay.classList.remove('hidden');
-          });
-        }
-      });
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      // --- KOMPONEN 2: GALERI CONTROLLER (DATABASE GAMBAR) ---
-      AFRAME.registerComponent('gallery-controller', {
-        init: function () {
-          // 1. DATABASE GAMBAR
-          this.database = {
-            'donat': ["#donatSatu", "#donatDua", "#donatTiga", "#donatEmpat", "#donatLima", "#donatEnam"],
-            'cookies': ["#cookiesSatu", "#cookiesDua"], // Galeri Cookies
-            'dimsum': ["#dimsumSatu", "#dimsumDua", "#dimsumTiga"] // Galeri Dimsum (jika dibutuhkan)
-          };
+<title>AR Menu Donat</title>
 
-          this.currentList = this.database['donat'];
-          this.currentIndex = 0;
-          this.displayPlane = document.querySelector('#plane-galeri');
-          this.arrowRight = document.querySelector('#arrow-right');
-          this.arrowLeft = document.querySelector('#arrow-left');
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-          this.arrowRight.addEventListener('click', () => {
-            this.currentIndex++;
-            if (this.currentIndex >= this.currentList.length) this.currentIndex = 0;
-            this.updateImage();
-          });
+<script>
 
-          this.arrowLeft.addEventListener('click', () => {
-            this.currentIndex--;
-            if (this.currentIndex < 0) this.currentIndex = this.currentList.length - 1;
-            this.updateImage();
-          });
-        },
+AFRAME.registerComponent("ui-mode",{
+init:function(){
 
-        changeCategory: function(categoryName) {
-            console.log("Ganti Kategori ke: " + categoryName);
-            if(this.database[categoryName]) {
-                this.currentList = this.database[categoryName];
-                this.currentIndex = 0;
-                this.updateImage();
-            }
-        },
+const overlayScan=document.querySelector(".scanner-overlay")
+const menu=document.querySelector("#menu-utama")
 
-        updateImage: function() {
-          this.displayPlane.setAttribute('src', this.currentList[this.currentIndex]);
-        }
-      });
+this.el.addEventListener("targetFound",()=>{
 
-      // --- KOMPONEN 3: MAIN MENU (LOGIKA KLIK) ---
-      AFRAME.registerComponent('main-menu', {
-        init: function() {
-          this.galleryCtrl = this.el.components['gallery-controller'];
+console.log("Marker ditemukan")
 
-          // Daftar Menu Utama (Yang akan disembunyikan/dimunculkan)
-          this.menuElements = [
-            document.querySelector('#btn-donat'),
-            document.querySelector('#btn-cookies'),  // Tombol Tengah/Kanan (Cookies)
-            document.querySelector('#btn-dimsum'),   // Tombol Kiri/Tengah (Dimsum)
-            document.querySelector('#icon-donat'),
-            document.querySelector('#icon-cookies'), // Ikon Cookies
-            document.querySelector('#icon-dimsum')
-          ];
+overlayScan.classList.add("hidden")
 
-          this.galeriElements = [
-            document.querySelector('#plane-galeri'),
-            document.querySelector('#arrow-left'),
-            document.querySelector('#arrow-right'),
-            document.querySelector('#home-button')
-          ];
+menu.classList.remove("hidden")
 
-          this.btnDonat = document.querySelector('#btn-donat');
-          this.btnCookies = document.querySelector('#btn-cookies');
-          this.btnDimsum = document.querySelector('#btn-dimsum');
-          this.homeBtn = document.querySelector("#home-button");
+})
 
-          // --- EVENT LISTENER ---
-          
-          // 1. Klik Donat (Kiri)
-          this.btnDonat.addEventListener('click', () => {
-            this.openGallery('donat');
-          });
+}
+})
 
-          // 2. Klik Cookies (Kanan) -> SESUAI PERMINTAAN
-          this.btnCookies.addEventListener('click', () => {
-            this.openGallery('cookies');
-          });
 
-          // 3. Klik Dimsum (Tengah)
-          this.btnDimsum.addEventListener('click', () => {
-            this.openGallery('dimsum');
-          });
+AFRAME.registerComponent("main-menu",{
 
-          // 4. Klik Home
-          this.homeBtn.addEventListener('click', () => {
-            this.closeGallery();
-          });
-        },
+init:function(){
 
-        openGallery: function(kategori) {
-            this.galleryCtrl.changeCategory(kategori);
-            this.menuElements.forEach(el => {
-                el.setAttribute('visible', false);
-                el.classList.remove('clickable');
-            });
-            this.galeriElements.forEach(el => {
-                el.setAttribute('visible', true);
-                if(el.id === 'home-button' || el.id.includes('arrow')) {
-                    el.classList.add('clickable');
-                }
-            });
-        },
+const menuUtama=document.querySelector("#menu-utama")
+const menuDonat=document.querySelector("#menu-donat")
+const menuDimsum=document.querySelector("#menu-dimsum")
+const menuCookies=document.querySelector("#menu-cookies")
 
-        closeGallery: function() {
-            this.galeriElements.forEach(el => {
-                el.setAttribute('visible', false);
-                el.classList.remove('clickable');
-            });
-            this.menuElements.forEach(el => {
-                el.setAttribute('visible', true);
-                if(el.id.includes('btn')) {
-                    el.classList.add('clickable');
-                }
-            });
-        }
-      });
-    </script>
+// tombol utama
+document.querySelector("#btn-donat").onclick=()=>{
 
-    <style>
-        .gambar { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 1; transition: opacity 0.5s ease-in-out; }
-        .gambar.hidden { opacity: 0; }
-        .holo { width: 70%; max-width: 300px; height: auto; opacity: 0.8; border-radius: 10px; background: rgba(255, 255, 255, 0.2); padding: 10px; backdrop-filter: blur(5px); }
-    </style>
+menuUtama.classList.add("hidden")
+menuDonat.classList.remove("hidden")
+
+}
+
+document.querySelector("#btn-dimsum").onclick=()=>{
+
+menuUtama.classList.add("hidden")
+menuDimsum.classList.remove("hidden")
+
+}
+
+document.querySelector("#btn-cookies").onclick=()=>{
+
+menuUtama.classList.add("hidden")
+menuCookies.classList.remove("hidden")
+
+}
+
+// tombol kembali
+
+document.querySelector("#close-donat").onclick=()=>{
+
+menuDonat.classList.add("hidden")
+menuUtama.classList.remove("hidden")
+
+}
+
+document.querySelector("#close-dimsum").onclick=()=>{
+
+menuDimsum.classList.add("hidden")
+menuUtama.classList.remove("hidden")
+
+}
+
+document.querySelector("#close-cookies").onclick=()=>{
+
+menuCookies.classList.add("hidden")
+menuUtama.classList.remove("hidden")
+
+}
+
+}
+
+})
+
+</script>
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+font-family:sans-serif;
+}
+
+/* scanner */
+
+.scanner-overlay{
+
+position:fixed;
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+z-index:10;
+
+background:rgba(0,0,0,0.3);
+
+animation:pulse 2s infinite;
+
+}
+
+@keyframes pulse{
+
+0%{opacity:0.5}
+50%{opacity:1}
+100%{opacity:0.5}
+
+}
+
+.scan-img{
+
+width:70%;
+max-width:300px;
+
+border-radius:10px;
+
+}
+
+/* menu utama */
+
+#menu-utama{
+
+position:fixed;
+
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%);
+
+display:flex;
+
+gap:20px;
+
+background:white;
+
+padding:20px;
+
+border-radius:15px;
+
+box-shadow:0 5px 20px rgba(0,0,0,0.4);
+
+z-index:20;
+
+}
+
+.menu-icon{
+
+width:80px;
+height:80px;
+
+cursor:pointer;
+
+transition:0.2s;
+
+}
+
+.menu-icon:active{
+
+transform:scale(0.9)
+
+}
+
+/* popup */
+
+.popup{
+
+position:fixed;
+
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%);
+
+background:white;
+
+padding:20px;
+
+border-radius:20px;
+
+width:80%;
+max-width:400px;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:10px;
+
+justify-content:center;
+
+z-index:30;
+
+}
+
+.popup img{
+
+width:80px;
+height:80px;
+
+object-fit:cover;
+
+border-radius:10px;
+
+}
+
+.popup button{
+
+width:100%;
+
+margin-top:10px;
+
+padding:10px;
+
+border:none;
+
+border-radius:10px;
+
+background:#ff6b6b;
+
+color:white;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+.hidden{
+
+display:none !important
+
+}
+
+.menu-title{
+width:100%;
+text-align:center;
+margin-bottom:10px;
+font-size:24px;
+font-weight:bold;
+}
+
+</style>
 </head>
+
 <body>
-    
-    <div class="gambar">
-        <img class="holo" src="TY Card (1).jpg" alt="Panduan Scan">
-    </div>
 
-    <a-scene mindar-image="imageTargetSrc: TyCardCompiled2.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
-             color-space="sRGB" 
-             renderer="colorManagement: true, physicallyCorrectLights" 
-             vr-mode-ui="enabled: false" 
-             device-orientation-permission-ui="enabled: false">
-      
-      <a-assets>
-        <img id="donatSatu" src="GambarDonat/4.png">
-        <img id="donatDua" src="GambarDonat/5.png">
-        <img id="donatTiga" src="GambarDonat/6.png">
-        <img id="donatEmpat" src="GambarDonat/7.png">
-        <img id="donatEnam" src="GambarDonat/6.png">
-        <img id="donatLima" src="GambarDonat/8.png">
+<!-- SCANNER CUSTOM -->
 
-        <img id="dimsumSatu" src="GambarDimsum/Dimsum 1.jpg">
-        <img id="dimsumDua" src="GambarDimsum/Dimsum 2.jpg">
-        <img id="dimsumTiga" src="GambarDimsum/Dimsum 3.jpg">
+<div class="scanner-overlay">
 
-        <img id="cookiesSatu" src="GambarCookies/Cookies 1.jpg">
-        <img id="cookiesDua" src="GambarCookies/Cookies 2.jpg">
-        
-        <img id="img-icon-donat" src="icons/2.png">
-        <img id="img-icon-dimsum" src="icons/1.png">
-        <img id="img-icon-cookies" src="icons/3.2.png"> <img id="img-btn-donat" src="buttons/1.png">
-        <img id="img-btn-dimsum" src="buttons/2.png">
-        <img id="img-btn-cookies" src="buttons/3.1.png"> <a-asset-item id="arrow" src="direction_arrow.glb"></a-asset-item>
-        <a-asset-item id="home" src="icon_home.glb"></a-asset-item>
-      </a-assets>
+<img src="TY Card (1).jpg" class="scan-img">
 
-      <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable"></a-camera>
+</div>
 
-      <a-entity id="target-entity" mindar-image-target="targetIndex: 0" ui-mode gallery-controller main-menu>
-        
-        <a-plane id="plane-galeri" src="#donatSatu" position="0 0 0" height="0.552" width="1" rotation="0 0 0" visible="false"></a-plane>
-        <a-gltf-model id="arrow-right" rotation="90 10 15" position="0.6 0 0" scale="0.05 0.05 0.05" src="#arrow" visible="false"></a-gltf-model>
-        <a-gltf-model id="arrow-left" rotation="90 180 15" position="-0.6 0 0" scale="0.05 0.05 0.05" src="#arrow" visible="false"></a-gltf-model>
-        <a-gltf-model id="home-button" rotation="0 180 0" position="0 -0.5 0" scale="0.005 0.005 0.005" src="#home" visible="false"></a-gltf-model>
-        
-        <a-plane id="icon-donat" src="#img-icon-donat" position="-0.35 0 0" height="0.3" width="0.3"></a-plane>
-        <a-plane id="btn-donat" class="clickable" src="#img-btn-donat" position="-0.35 0.2 0" height="0.09" width="0.3"></a-plane>
+<!-- MENU UTAMA -->
 
-        <a-plane id="icon-dimsum" src="#img-icon-dimsum" position="0 0 0" height="0.3" width="0.3"></a-plane>
-        <a-plane id="btn-dimsum" class="clickable" src="#img-btn-dimsum" position="0 0.2 0" height="0.09" width="0.3"></a-plane>
+<div id="menu-utama" class="hidden">
 
-        <a-plane id="icon-cookies" src="#img-icon-cookies" position="0.35 0 0" height="0.3" width="0.3"></a-plane>
-        <a-plane id="btn-cookies" class="clickable" src="#img-btn-cookies" position="0.35 0.2 0" height="0.09" width="0.3"></a-plane>
-      
-      </a-entity>
-    </a-scene>
+<img id="btn-donat" src="icons/2.png" class="menu-icon">
+<img id="btn-dimsum" src="icons/1.png" class="menu-icon">
+<img id="btn-cookies" src="icons/3.2.png" class="menu-icon">
+
+</div>
+
+
+<!-- MENU DONAT -->
+
+<div id="menu-donat" class="popup hidden">
+
+<h3 class="menu-title">Varian Donat</h3>
+
+<img src="GambarDonat/4.png">
+<img src="GambarDonat/5.png">
+<img src="GambarDonat/6.png">
+<img src="GambarDonat/7.png">
+<img src="GambarDonat/8.png">
+<img src="GambarDonat/9.png">
+
+<button id="close-donat">Kembali</button>
+
+</div>
+
+
+<!-- MENU DIMSUM -->
+
+<div id="menu-dimsum" class="popup hidden">
+
+<h3 class="menu-title">Varian Dimsum</h3>
+
+<img src="GambarDimsum/Dimsum 1.jpg">
+<img src="GambarDimsum/Dimsum 2.jpg">
+<img src="GambarDimsum/Dimsum 3.jpg">
+
+<button id="close-dimsum">Kembali</button>
+
+</div>
+
+
+<!-- MENU COOKIES -->
+
+<div id="menu-cookies" class="popup hidden">
+
+<h3 class="menu-title">Varian Cookies</h3>
+
+<img src="GambarCookies/Cookies 1.jpg">
+<img src="GambarCookies/Cookies 2.jpg">
+
+<button id="close-cookies">Kembali</button>
+
+</div>
+
+
+<!-- SCENE AR -->
+
+<a-scene
+
+mindar-image="imageTargetSrc: TyCardCompiled2.mind; uiScanning:no; uiLoading:no; uiError:no;"
+
+color-space="sRGB"
+
+renderer="colorManagement: true"
+
+vr-mode-ui="enabled: false"
+
+device-orientation-permission-ui="enabled: false"
+
+>
+
+<a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+
+<a-entity mindar-image-target="targetIndex:0" ui-mode main-menu></a-entity>
+
+</a-scene>
+
 </body>
 </html>
